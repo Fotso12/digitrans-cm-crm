@@ -1,9 +1,8 @@
 package cm.camtech.crm.entities;
 
 import jakarta.persistence.*;
-import src.main.java.cm.camtech.crm.entities.Commandes;
-import src.main.java.cm.camtech.crm.entities.Campagnes;
-import src.main.java.cm.camtech.crm.entities.Clients;
+import cm.camtech.crm.entities.Campagnes;
+
 
 
 import java.io.Serializable;

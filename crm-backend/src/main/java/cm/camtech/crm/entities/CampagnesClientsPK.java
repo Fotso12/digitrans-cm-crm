@@ -1,4 +1,4 @@
-package src.main.java.cm.camtech.crm.entities;
+package cm.camtech.crm.entities;
 
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
