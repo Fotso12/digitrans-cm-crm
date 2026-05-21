@@ -1,4 +1,16 @@
-package src.main.java.cm.camtech.crm.mappers;
+package cm.camtech.crm.mappers;
 
+import cm.camtech.crm.dtos.CampagnesDto;
+import cm.camtech.crm.entities.Campagnes;
+import org.mapstru.Mapper;
+import org.mapstruct.Mapping;
+
+@Mapper(componentModel = "spring")
 public interface CampagnesMapper {
+
+    @Mapping(source = "creePar.id", target = "creeParId")
+    CampagnesDto toDto(Campagnes campagnes);
+
+    @Mapping(source = "creeParId", target = "creePar.id")
+    Campagnes toEntity(CampagnesDto campagnesDto);
 }
