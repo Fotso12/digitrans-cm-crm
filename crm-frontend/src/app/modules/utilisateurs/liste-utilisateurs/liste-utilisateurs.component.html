@@ -1,0 +1,35 @@
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Utilisateurs</h1>
+    <a routerLink="/utilisateurs/nouveau" class="btn btn-primary">
+      <i class="fas fa-plus me-1"></i>Nouvel utilisateur
+    </a>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>#</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Rôle</th><th>Actif</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of utilisateurs">
+              <td>{{ u.id }}</td>
+              <td>{{ u.nom }}</td>
+              <td>{{ u.prenom }}</td>
+              <td>{{ u.email }}</td>
+              <td><span class="badge bg-info">{{ u.role }}</span></td>
+              <td><i class="fas" [class.fa-check-circle]="u.actif" [class.fa-times-circle]="!u.actif"></i></td>
+              <td>
+                <a [routerLink]="['/utilisateurs', u.id, 'edit']" class="btn btn-sm btn-warning me-1"><i class="fas fa-edit"></i></a>
+                <button (click)="delete(u.id!)" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

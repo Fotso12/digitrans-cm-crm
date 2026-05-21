@@ -1,0 +1,55 @@
+<div class="container-fluid p-4">
+  <h1>{{ isEdit ? 'Modifier' : 'Nouveau' }} client</h1>
+  <div class="card">
+    <div class="card-body">
+      <form (ngSubmit)="save()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Nom *</label>
+            <input class="form-control" [(ngModel)]="client.nom" name="nom" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Prénom *</label>
+            <input class="form-control" [(ngModel)]="client.prenom" name="prenom" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" [(ngModel)]="client.email" name="email">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Téléphone *</label>
+            <input class="form-control" [(ngModel)]="client.telephone" name="telephone" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Adresse</label>
+            <input class="form-control" [(ngModel)]="client.adresse" name="adresse">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Ville</label>
+            <input class="form-control" [(ngModel)]="client.ville" name="ville">
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Points fidélité</label>
+            <input type="number" class="form-control" [(ngModel)]="client.pointsFidelite" name="pointsFidelite">
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Niveau</label>
+            <select class="form-select" [(ngModel)]="client.niveauFidelite" name="niveauFidelite">
+              <option>BRONZE</option><option>ARGENT</option><option>OR</option><option>PLATINE</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Statut</label>
+            <select class="form-select" [(ngModel)]="client.statut" name="statut">
+              <option>ACTIF</option><option>INACTIF</option><option>SUSPENDU</option>
+            </select>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+          <a routerLink="/clients" class="btn btn-secondary">Annuler</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
