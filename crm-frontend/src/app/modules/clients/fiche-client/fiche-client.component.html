@@ -1,0 +1,29 @@
+<div class="container-fluid p-4">
+  @if (client) {
+    <h1>Fiche client</h1>
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Nom :</strong> {{ client.nom }}</p>
+            <p><strong>Prénom :</strong> {{ client.prenom }}</p>
+            <p><strong>Email :</strong> {{ client.email }}</p>
+            <p><strong>Téléphone :</strong> {{ client.telephone }}</p>
+            <p><strong>Date naissance :</strong> {{ client.dateNaissance | date }}</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Adresse :</strong> {{ client.adresse }}</p>
+            <p><strong>Ville :</strong> {{ client.ville }}</p>
+            <p><strong>Points fidélité :</strong> {{ client.pointsFidelite }}</p>
+            <p><strong>Niveau :</strong> {{ client.niveauFidelite }}</p>
+            <p><strong>Statut :</strong> {{ client.statut }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <a routerLink="/clients" class="btn btn-secondary">Retour</a>
+        <a [routerLink]="['/clients', client.id, 'edit']" class="btn btn-warning ms-2">Modifier</a>
+      </div>
+    </div>
+  }
+</div>
