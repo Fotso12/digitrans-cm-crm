@@ -1,4 +1,9 @@
-package src.main.java.cm.camtech.crm.repositories;
+package cm.camtech.crm.repositories;
 
-public interface ReclamationsRepo {
+import cm.camtech.crm.entities.Reclamations;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ReclamationsRepo extends JpaRepository<Reclamations, Long> {
 }

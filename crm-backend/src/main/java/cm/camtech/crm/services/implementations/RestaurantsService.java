@@ -5,6 +5,8 @@ import cm.camtech.crm.entities.Restaurants;
 import cm.camtech.crm.mappers.RestaurantsMapper;
 import cm.camtech.crm.repositories.RestaurantsRepo;
 import cm.camtech.crm.services.interfaces.RestaurantsInterface;
+import cm.camtech.crm.exceptions.ApiException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +27,10 @@ public class RestaurantsService implements RestaurantsInterface {
     @Override
     public RestaurantsDto save(RestaurantsDto restaurantsDto) {
 
+        if (restaurantsDto == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Données de restaurant invalides");
+        }
+
         Restaurants restaurants = restaurantsMapper.toEntity(restaurantsDto);
 
         return restaurantsMapper.toDto(
@@ -34,6 +40,13 @@ public class RestaurantsService implements RestaurantsInterface {
 
     @Override
     public RestaurantsDto update(Long id, RestaurantsDto restaurantsDto) {
+
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de restaurant invalide");
+        }
+        if (!restaurantsRepo.existsById(id)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Restaurant introuvable");
+        }
 
         Restaurants restaurants = restaurantsMapper.toEntity(restaurantsDto);
 
@@ -47,9 +60,13 @@ public class RestaurantsService implements RestaurantsInterface {
     @Override
     public RestaurantsDto findById(Long id) {
 
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de restaurant invalide");
+        }
+
         return restaurantsRepo.findById(id)
                 .map(restaurantsMapper::toDto)
-                .orElse(null);
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Restaurant introuvable"));
     }
 
     @Override
@@ -63,6 +80,13 @@ public class RestaurantsService implements RestaurantsInterface {
 
     @Override
     public void delete(Long id) {
+
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de restaurant invalide");
+        }
+        if (!restaurantsRepo.existsById(id)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Restaurant introuvable");
+        }
 
         restaurantsRepo.deleteById(id);
     }
