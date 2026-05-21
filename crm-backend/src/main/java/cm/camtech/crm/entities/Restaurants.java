@@ -1,6 +1,12 @@
-package agritrans.demo.entities;
+package cm.camtech.crm.entities;
 
 import jakarta.persistence.*;
+import cm.camtech.crm.entities.Commandes;
+import cm.camtech.crm.entities.Campagnes;
+import cm.camtech.crm.entities.Clients;
+import cm.camtech.crm.entities.Utilisateurs;
+import cm.camtech.crm.entities.CampagnesClients;
+import cm.camtech.crm.entities.CampagnesClientsPK;
 
 import java.io.Serializable;
 import java.util.Collection;

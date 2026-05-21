@@ -1,4 +1,4 @@
-package agritrans.demo.entities;
+package cm.camtech.crm.entities;
 
 import jakarta.persistence.*;
 
