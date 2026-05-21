@@ -1,4 +1,9 @@
-package src.main.java.cm.camtech.crm.repositories;
+package cm.camtech.crm.repositories;
 
-public interface CommandesRepo {
+import cm.camtech.crm.entities.Commandes;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface CommandesRepo extends JpaRepository<Commandes, Long> {
 }
