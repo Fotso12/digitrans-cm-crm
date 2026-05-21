@@ -5,6 +5,8 @@ import cm.camtech.crm.entities.Clients;
 import cm.camtech.crm.mappers.ClientsMapper;
 import cm.camtech.crm.repositories.ClientsRepo;
 import cm.camtech.crm.services.interfaces.ClientsInterface;
+import cm.camtech.crm.exceptions.ApiException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +27,10 @@ public class ClientsService implements ClientsInterface {
     @Override
     public ClientsDto save(ClientsDto clientsDto) {
 
+        if (clientsDto == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Données de client invalides");
+        }
+
         Clients clients = clientsMapper.toEntity(clientsDto);
 
         return clientsMapper.toDto(
@@ -34,6 +40,13 @@ public class ClientsService implements ClientsInterface {
 
     @Override
     public ClientsDto update(Long id, ClientsDto clientsDto) {
+
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de client invalide");
+        }
+        if (!clientsRepo.existsById(id)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Client introuvable");
+        }
 
         Clients clients = clientsMapper.toEntity(clientsDto);
 
@@ -47,9 +60,13 @@ public class ClientsService implements ClientsInterface {
     @Override
     public ClientsDto findById(Long id) {
 
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de client invalide");
+        }
+
         return clientsRepo.findById(id)
                 .map(clientsMapper::toDto)
-                .orElse(null);
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Client introuvable"));
     }
 
     @Override
@@ -63,6 +80,13 @@ public class ClientsService implements ClientsInterface {
 
     @Override
     public void delete(Long id) {
+
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de client invalide");
+        }
+        if (!clientsRepo.existsById(id)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Client introuvable");
+        }
 
         clientsRepo.deleteById(id);
     }

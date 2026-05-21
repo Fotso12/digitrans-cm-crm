@@ -5,6 +5,8 @@ import cm.camtech.crm.entities.Commandes;
 import cm.camtech.crm.mappers.CommandesMapper;
 import cm.camtech.crm.repositories.CommandesRepo;
 import cm.camtech.crm.services.interfaces.CommandesInterface;
+import cm.camtech.crm.exceptions.ApiException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +27,10 @@ public class CommandesService implements CommandesInterface {
     @Override
     public CommandesDto save(CommandesDto commandesDto) {
 
+        if (commandesDto == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Données de commande invalides");
+        }
+
         Commandes commandes = commandesMapper.toEntity(commandesDto);
 
         return commandesMapper.toDto(
@@ -34,6 +40,13 @@ public class CommandesService implements CommandesInterface {
 
     @Override
     public CommandesDto update(Long id, CommandesDto commandesDto) {
+
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de commande invalide");
+        }
+        if (!commandesRepo.existsById(id)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Commande introuvable");
+        }
 
         Commandes commandes = commandesMapper.toEntity(commandesDto);
 
@@ -47,9 +60,13 @@ public class CommandesService implements CommandesInterface {
     @Override
     public CommandesDto findById(Long id) {
 
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de commande invalide");
+        }
+
         return commandesRepo.findById(id)
                 .map(commandesMapper::toDto)
-                .orElse(null);
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Commande introuvable"));
     }
 
     @Override
@@ -63,6 +80,13 @@ public class CommandesService implements CommandesInterface {
 
     @Override
     public void delete(Long id) {
+
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de commande invalide");
+        }
+        if (!commandesRepo.existsById(id)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Commande introuvable");
+        }
 
         commandesRepo.deleteById(id);
     }

@@ -5,6 +5,8 @@ import cm.camtech.crm.entities.Campagnes;
 import cm.camtech.crm.mappers.CampagnesMapper;
 import cm.camtech.crm.repositories.CampagnesRepo;
 import cm.camtech.crm.services.interfaces.CampagnesInterface;
+import cm.camtech.crm.exceptions.ApiException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +27,10 @@ public class CampagnesService implements CampagnesInterface {
     @Override
     public CampagnesDto save(CampagnesDto campagnesDto) {
 
+        if (campagnesDto == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Données de campagne invalides");
+        }
+
         Campagnes campagnes = campagnesMapper.toEntity(campagnesDto);
 
         return campagnesMapper.toDto(
@@ -34,6 +40,13 @@ public class CampagnesService implements CampagnesInterface {
 
     @Override
     public CampagnesDto update(Long id, CampagnesDto campagnesDto) {
+
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de campagne invalide");
+        }
+        if (!campagnesRepo.existsById(id)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Campagne introuvable");
+        }
 
         Campagnes campagnes = campagnesMapper.toEntity(campagnesDto);
 
@@ -47,9 +60,13 @@ public class CampagnesService implements CampagnesInterface {
     @Override
     public CampagnesDto findById(Long id) {
 
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de campagne invalide");
+        }
+
         return campagnesRepo.findById(id)
                 .map(campagnesMapper::toDto)
-                .orElse(null);
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Campagne introuvable"));
     }
 
     @Override
@@ -63,6 +80,13 @@ public class CampagnesService implements CampagnesInterface {
 
     @Override
     public void delete(Long id) {
+
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de campagne invalide");
+        }
+        if (!campagnesRepo.existsById(id)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Campagne introuvable");
+        }
 
         campagnesRepo.deleteById(id);
     }

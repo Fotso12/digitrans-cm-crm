@@ -5,6 +5,8 @@ import cm.camtech.crm.entities.Utilisateurs;
 import cm.camtech.crm.mappers.UtilisateursMapper;
 import cm.camtech.crm.repositories.UtilisateursRepo;
 import cm.camtech.crm.services.interfaces.UtilisateursInterface;
+import cm.camtech.crm.exceptions.ApiException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +27,10 @@ public class UtilisateursService implements UtilisateursInterface {
     @Override
     public UtilisateursDto save(UtilisateursDto utilisateursDto) {
 
+        if (utilisateursDto == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Données d'utilisateur invalides");
+        }
+
         Utilisateurs utilisateurs = utilisateursMapper.toEntity(utilisateursDto);
 
         return utilisateursMapper.toDto(
@@ -34,6 +40,13 @@ public class UtilisateursService implements UtilisateursInterface {
 
     @Override
     public UtilisateursDto update(Long id, UtilisateursDto utilisateursDto) {
+
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant d'utilisateur invalide");
+        }
+        if (!utilisateursRepo.existsById(id)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Utilisateur introuvable");
+        }
 
         Utilisateurs utilisateurs = utilisateursMapper.toEntity(utilisateursDto);
 
@@ -47,9 +60,13 @@ public class UtilisateursService implements UtilisateursInterface {
     @Override
     public UtilisateursDto findById(Long id) {
 
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant d'utilisateur invalide");
+        }
+
         return utilisateursRepo.findById(id)
                 .map(utilisateursMapper::toDto)
-                .orElse(null);
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
     }
 
     @Override
@@ -63,6 +80,13 @@ public class UtilisateursService implements UtilisateursInterface {
 
     @Override
     public void delete(Long id) {
+
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant d'utilisateur invalide");
+        }
+        if (!utilisateursRepo.existsById(id)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Utilisateur introuvable");
+        }
 
         utilisateursRepo.deleteById(id);
     }
