@@ -1,4 +1,0 @@
-package cm.camtech.crm.servicesTest;
-
-public class ProduitsServiceTest {
-}
