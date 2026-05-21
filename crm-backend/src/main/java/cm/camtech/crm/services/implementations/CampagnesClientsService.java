@@ -6,6 +6,8 @@ import cm.camtech.crm.entities.CampagnesClientsPK;
 import cm.camtech.crm.mappers.CampagnesClientsMapper;
 import cm.camtech.crm.repositories.CampagnesClientsRepo;
 import cm.camtech.crm.services.interfaces.CampagnesClientsInterface;
+import cm.camtech.crm.exceptions.ApiException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +28,10 @@ public class CampagnesClientsService implements CampagnesClientsInterface {
     @Override
     public CampagnesClientsDto save(CampagnesClientsDto campagnesClientsDto) {
 
+        if (campagnesClientsDto == null || campagnesClientsDto.getCampagneId() == null || campagnesClientsDto.getClientId() == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Données de campagne-client invalides");
+        }
+
         CampagnesClients campagnesClients =
                 campagnesClientsMapper.toEntity(campagnesClientsDto);
 
@@ -37,13 +43,17 @@ public class CampagnesClientsService implements CampagnesClientsInterface {
     @Override
     public CampagnesClientsDto findById(Long campagneId, Long clientId) {
 
+        if (campagneId == null || clientId == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiants de campagne-client invalides");
+        }
+
         CampagnesClientsPK pk = new CampagnesClientsPK();
         pk.setCampagneId(campagneId);
         pk.setClientId(clientId);
 
         return campagnesClientsRepo.findById(pk)
                 .map(campagnesClientsMapper::toDto)
-                .orElse(null);
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Association campagne-client introuvable"));
     }
 
     @Override
@@ -58,9 +68,17 @@ public class CampagnesClientsService implements CampagnesClientsInterface {
     @Override
     public void delete(Long campagneId, Long clientId) {
 
+        if (campagneId == null || clientId == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiants de campagne-client invalides");
+        }
+
         CampagnesClientsPK pk = new CampagnesClientsPK();
         pk.setCampagneId(campagneId);
         pk.setClientId(clientId);
+
+        if (!campagnesClientsRepo.existsById(pk)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Association campagne-client introuvable");
+        }
 
         campagnesClientsRepo.deleteById(pk);
     }

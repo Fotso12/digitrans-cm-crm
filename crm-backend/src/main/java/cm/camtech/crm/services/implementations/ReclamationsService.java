@@ -5,6 +5,8 @@ import cm.camtech.crm.entities.Reclamations;
 import cm.camtech.crm.mappers.ReclamationsMapper;
 import cm.camtech.crm.repositories.ReclamationsRepo;
 import cm.camtech.crm.services.interfaces.ReclamationsInterface;
+import cm.camtech.crm.exceptions.ApiException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +27,10 @@ public class ReclamationsService implements ReclamationsInterface {
     @Override
     public ReclamationsDto save(ReclamationsDto reclamationsDto) {
 
+        if (reclamationsDto == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Données de réclamation invalides");
+        }
+
         Reclamations reclamations = reclamationsMapper.toEntity(reclamationsDto);
 
         return reclamationsMapper.toDto(
@@ -34,6 +40,13 @@ public class ReclamationsService implements ReclamationsInterface {
 
     @Override
     public ReclamationsDto update(Long id, ReclamationsDto reclamationsDto) {
+
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de réclamation invalide");
+        }
+        if (!reclamationsRepo.existsById(id)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Réclamation introuvable");
+        }
 
         Reclamations reclamations = reclamationsMapper.toEntity(reclamationsDto);
 
@@ -47,9 +60,13 @@ public class ReclamationsService implements ReclamationsInterface {
     @Override
     public ReclamationsDto findById(Long id) {
 
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de réclamation invalide");
+        }
+
         return reclamationsRepo.findById(id)
                 .map(reclamationsMapper::toDto)
-                .orElse(null);
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Réclamation introuvable"));
     }
 
     @Override
@@ -63,6 +80,13 @@ public class ReclamationsService implements ReclamationsInterface {
 
     @Override
     public void delete(Long id) {
+
+        if (id == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Identifiant de réclamation invalide");
+        }
+        if (!reclamationsRepo.existsById(id)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "Réclamation introuvable");
+        }
 
         reclamationsRepo.deleteById(id);
     }
