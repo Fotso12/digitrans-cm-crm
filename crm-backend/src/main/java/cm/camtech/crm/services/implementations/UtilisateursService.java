@@ -90,4 +90,24 @@ public class UtilisateursService implements UtilisateursInterface {
 
         utilisateursRepo.deleteById(id);
     }
+    @Override
+    public UtilisateursDto saveUtilisateur(UtilisateursDto utilisateursDto) {
+        return save(utilisateursDto);
+    }
+
+    @Override
+    public void deleteUtilisateur(long l) {
+        delete(l);
+    }
+
+    @Override
+    public Utilisateurs getUtilisateurById(long l) {
+        return utilisateursRepo.findById(l)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
+    }
+
+    @Override
+    public java.util.List<Utilisateurs> getAllUtilisateurs() {
+        return utilisateursRepo.findAll();
+    }
 }
