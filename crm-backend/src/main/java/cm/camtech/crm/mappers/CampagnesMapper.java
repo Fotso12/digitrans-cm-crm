@@ -2,7 +2,7 @@ package cm.camtech.crm.mappers;
 
 import cm.camtech.crm.dtos.CampagnesDto;
 import cm.camtech.crm.entities.Campagnes;
-import org.mapstru.Mapper;
+import org.mapstrut.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")

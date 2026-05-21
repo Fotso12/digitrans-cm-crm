@@ -1,4 +1,9 @@
-package src.main.java.cm.camtech.crm.repositories;
+package cm.camtech.crm.repositories;
 
-public interface ClientsRepo {
+import cm.camtech.crm.entities.Clients;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ClientsRepo extends JpaRepository<Clients, Long> {
 }
