@@ -2,6 +2,7 @@ package cm.camtech.crm.entities;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
