@@ -90,4 +90,25 @@ public class RestaurantsService implements RestaurantsInterface {
 
         restaurantsRepo.deleteById(id);
     }
+   
+    @Override
+    public RestaurantsDto saveRestaurant(RestaurantsDto restaurantsDto) {
+        return save(restaurantsDto);
+    }
+
+    @Override
+    public void deleteRestaurant(long l) {
+        delete(l);
+    }
+
+    @Override
+    public java.util.List<Restaurants> getAllRestaurants() {
+        return restaurantsRepo.findAll();
+    }
+
+    @Override
+    public Restaurants getRestaurantById(long l) {
+        return restaurantsRepo.findById(l)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Restaurant introuvable"));
+    }
 }

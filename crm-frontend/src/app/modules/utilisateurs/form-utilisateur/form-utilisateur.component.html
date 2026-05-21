@@ -1,0 +1,41 @@
+<div class="container-fluid p-4">
+  <h1>{{ isEdit ? 'Modifier' : 'Nouvel' }} utilisateur</h1>
+  <div class="card">
+    <div class="card-body">
+      <form (ngSubmit)="save()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Nom *</label>
+            <input class="form-control" [(ngModel)]="utilisateur.nom" name="nom" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Prénom *</label>
+            <input class="form-control" [(ngModel)]="utilisateur.prenom" name="prenom" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Email *</label>
+            <input type="email" class="form-control" [(ngModel)]="utilisateur.email" name="email" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Mot de passe</label>
+            <input type="password" class="form-control" [(ngModel)]="utilisateur.motDePasse" name="motDePasse">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Rôle</label>
+            <select class="form-select" [(ngModel)]="utilisateur.role" name="role">
+              <option>ROLE_USER</option><option>ROLE_ADMIN</option><option>ROLE_MANAGER</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3 form-check d-flex align-items-center mt-4">
+            <input type="checkbox" class="form-check-input me-2" [(ngModel)]="utilisateur.actif" name="actif" id="actif">
+            <label class="form-check-label" for="actif">Actif</label>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+          <a routerLink="/utilisateurs" class="btn btn-secondary">Annuler</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

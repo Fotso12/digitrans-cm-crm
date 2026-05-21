@@ -1,0 +1,35 @@
+<div class="container-fluid p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Réclamations</h1>
+    <a routerLink="/reclamations/nouveau" class="btn btn-primary">
+      <i class="fas fa-plus me-1"></i>Nouvelle réclamation
+    </a>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>#</th><th>Réf.</th><th>Sujet</th><th>Priorité</th><th>Statut</th><th>Date</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of reclamations">
+              <td>{{ r.id }}</td>
+              <td>{{ r.reference }}</td>
+              <td>{{ r.sujet }}</td>
+              <td><span class="badge" [class.bg-danger]="r.priorite==='HAUTE'">{{ r.priorite }}</span></td>
+              <td>{{ r.statut }}</td>
+              <td>{{ r.dateCreation | date }}</td>
+              <td>
+                <a [routerLink]="['/reclamations', r.id, 'edit']" class="btn btn-sm btn-warning me-1"><i class="fas fa-edit"></i></a>
+                <button (click)="delete(r.id!)" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

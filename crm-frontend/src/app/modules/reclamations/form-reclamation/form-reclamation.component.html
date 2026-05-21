@@ -1,0 +1,51 @@
+<div class="container-fluid p-4">
+  <h1>{{ isEdit ? 'Modifier' : 'Nouvelle' }} réclamation</h1>
+  <div class="card">
+    <div class="card-body">
+      <form (ngSubmit)="save()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Référence *</label>
+            <input class="form-control" [(ngModel)]="reclamation.reference" name="reference" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Priorité</label>
+            <select class="form-select" [(ngModel)]="reclamation.priorite" name="priorite">
+              <option>BASSE</option><option>MOYENNE</option><option>HAUTE</option><option>CRITIQUE</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Sujet *</label>
+            <input class="form-control" [(ngModel)]="reclamation.sujet" name="sujet" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Statut</label>
+            <select class="form-select" [(ngModel)]="reclamation.statut" name="statut">
+              <option>OUVERTE</option><option>EN_COURS</option><option>RÉSOLUE</option><option>FERMÉE</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Client ID *</label>
+            <input type="number" class="form-control" [(ngModel)]="reclamation.clientId" name="clientId" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Commande ID</label>
+            <input type="number" class="form-control" [(ngModel)]="reclamation.commandeId" name="commandeId">
+          </div>
+          <div class="col-12 mb-3">
+            <label class="form-label">Description *</label>
+            <textarea class="form-control" [(ngModel)]="reclamation.description" name="description" rows="3" required></textarea>
+          </div>
+          <div class="col-12 mb-3">
+            <label class="form-label">Résolution</label>
+            <textarea class="form-control" [(ngModel)]="reclamation.resolution" name="resolution" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+          <a routerLink="/reclamations" class="btn btn-secondary">Annuler</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
