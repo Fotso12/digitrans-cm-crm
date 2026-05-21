@@ -1,0 +1,45 @@
+<div class="container-fluid p-4">
+  <h1>{{ isEdit ? 'Modifier' : 'Nouvelle' }} campagne</h1>
+  <div class="card">
+    <div class="card-body">
+      <form (ngSubmit)="save()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Nom *</label>
+            <input class="form-control" [(ngModel)]="campagne.nom" name="nom" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Statut</label>
+            <select class="form-select" [(ngModel)]="campagne.statut" name="statut">
+              <option>PLANIFIÉE</option><option>ACTIVE</option><option>TERMINÉE</option><option>ANNULÉE</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Date début</label>
+            <input type="date" class="form-control" [(ngModel)]="campagne.dateDebut" name="dateDebut">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Date fin</label>
+            <input type="date" class="form-control" [(ngModel)]="campagne.dateFin" name="dateFin">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Segment cible</label>
+            <input class="form-control" [(ngModel)]="campagne.cibleSegment" name="cibleSegment">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Créé par (ID)</label>
+            <input type="number" class="form-control" [(ngModel)]="campagne.creeParId" name="creeParId">
+          </div>
+          <div class="col-12 mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" [(ngModel)]="campagne.description" name="description" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+          <a routerLink="/campagnes" class="btn btn-secondary">Annuler</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
