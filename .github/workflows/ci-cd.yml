@@ -171,24 +171,20 @@ jobs:
           cd terraform
           terraform init
 
-      # S'assurer d'avoir une clé SSH pour se connecter et déployer
-      - name: Setup SSH Key
+      # Génération d'une paire de clés SSH éphémère (aucun secret SSH requis)
+      - name: Générer une paire de clés SSH éphémère
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          # Ajouter un retour à la ligne à la fin de la clé pour éviter l'erreur de format OpenSSL/libcrypto
-          echo "" >> ~/.ssh/id_rsa
-          # Extraire la clé publique pour Terraform
-          ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+          ssh-keygen -t ed25519 -f ~/.ssh/id_ephemeral -N "" -C "github-actions-deploy"
+          echo "SSH_PUB_KEY=$(cat ~/.ssh/id_ephemeral.pub)" >> $GITHUB_ENV
 
       - name: Terraform Apply
         id: apply
         run: |
           cd terraform
-          # Appliquer en passant la clé publique extraite
-          terraform apply -auto-approve -var="ssh_public_key=$(cat ~/.ssh/id_rsa.pub)"
-          
+          # Utiliser la clé publique éphémère générée ci-dessus
+          terraform apply -auto-approve -var="ssh_public_key=${{ env.SSH_PUB_KEY }}"
+
           # Récupérer les Outputs nécessaires
           EC2_IP=$(terraform output -raw ec2_public_ip)
           RDS_ENDPOINT=$(terraform output -raw database_endpoint)
@@ -201,7 +197,7 @@ jobs:
         with:
           host: ${{ env.EC2_IP }}
           username: ubuntu
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key_path: ~/.ssh/id_ephemeral
           envs: RDS_ENDPOINT, DOCKERHUB_USER, DOCKERHUB_TOKEN
           script: |
             # Attendre que Docker soit installé par user_data si c'est le premier lancement
