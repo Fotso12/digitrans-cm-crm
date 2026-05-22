@@ -39,8 +39,8 @@ jobs:
         run: |
           cd crm-frontend
           npm install
-          # Utilisons le lanceur Angular CLI officiel pour que TestBed soit correctement initialisé
-          npm run test -- --run
+          # Utilisons l'option standard d'Angular CLI pour exécuter les tests une seule fois
+          npx ng test --watch=false
 
   # 2. Scans de Sécurité
   security-scans:
