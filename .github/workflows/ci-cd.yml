@@ -111,10 +111,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Trim DockerHub Credentials
+        run: |
+          CLEANED_USER=$(echo "${{ secrets.DOCKERHUB_USERNAME }}" | xargs)
+          echo "DOCKERHUB_USER=$CLEANED_USER" >> $GITHUB_ENV
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ env.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # Build & Push Backend
@@ -124,8 +129,8 @@ jobs:
           context: ./crm-backend
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/digitrans-crm-backend:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/digitrans-crm-backend:${{ github.sha }}
+            ${{ env.DOCKERHUB_USER }}/digitrans-crm-backend:latest
+            ${{ env.DOCKERHUB_USER }}/digitrans-crm-backend:${{ github.sha }}
 
       # Build & Push Frontend
       - name: Build and Push Frontend Image
@@ -134,8 +139,8 @@ jobs:
           context: ./crm-frontend
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/digitrans-crm-frontend:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/digitrans-crm-frontend:${{ github.sha }}
+            ${{ env.DOCKERHUB_USER }}/digitrans-crm-frontend:latest
+            ${{ env.DOCKERHUB_USER }}/digitrans-crm-frontend:${{ github.sha }}
 
   # 5. Déploiement Terraform Apply et Mise en Ligne sur EC2
   terraform-apply-and-deploy:
@@ -148,6 +153,13 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Trim DockerHub Credentials
+        run: |
+          CLEANED_USER=$(echo "${{ secrets.DOCKERHUB_USERNAME }}" | xargs)
+          CLEANED_TOKEN=$(echo "${{ secrets.DOCKERHUB_TOKEN }}" | xargs)
+          echo "DOCKERHUB_USER=$CLEANED_USER" >> $GITHUB_ENV
+          echo "DOCKERHUB_TOKEN=$CLEANED_TOKEN" >> $GITHUB_ENV
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -188,7 +200,7 @@ jobs:
           host: ${{ env.EC2_IP }}
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: RDS_ENDPOINT, DOCKERHUB_USERNAME
+          envs: RDS_ENDPOINT, DOCKERHUB_USER, DOCKERHUB_TOKEN
           script: |
             # Attendre que Docker soit installé par user_data si c'est le premier lancement
             until command -v docker-compose &> /dev/null; do
@@ -197,7 +209,7 @@ jobs:
             done
             
             # Se connecter à Docker Hub
-            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+            docker login -u "$DOCKERHUB_USER" -p "$DOCKERHUB_TOKEN"
             
             # Créer le répertoire de l'application
             mkdir -p ~/app
@@ -208,13 +220,13 @@ jobs:
             version: '3.8'
             services:
               crm-backend:
-                image: ${DOCKERHUB_USERNAME}/digitrans-crm-backend:latest
+                image: \${DOCKERHUB_USER}/digitrans-crm-backend:latest
                 container_name: crm-backend
                 restart: always
                 ports:
                   - "8081:8081"
                 environment:
-                  - SPRING_DATASOURCE_URL=jdbc:mysql://${RDS_ENDPOINT}/crm_digitrans?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+                  - SPRING_DATASOURCE_URL=jdbc:mysql://\${RDS_ENDPOINT}/crm_digitrans?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
                   - SPRING_DATASOURCE_USERNAME=dbadmin
                   - SPRING_DATASOURCE_PASSWORD=dbpassword12345
                   - JWT_SECRET=CamtechCrmSecretKey2026DigitransCM
@@ -222,7 +234,7 @@ jobs:
                   - SPRING_WEB_CORS_ALLOWED_ORIGINS=*
 
               crm-frontend:
-                image: ${DOCKERHUB_USERNAME}/digitrans-crm-frontend:latest
+                image: \${DOCKERHUB_USER}/digitrans-crm-frontend:latest
                 container_name: crm-frontend
                 restart: always
                 ports:
