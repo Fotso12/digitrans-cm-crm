@@ -177,6 +177,10 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keygen -t ed25519 -f ~/.ssh/id_ephemeral -N "" -C "github-actions-deploy"
           echo "SSH_PUB_KEY=$(cat ~/.ssh/id_ephemeral.pub)" >> $GITHUB_ENV
+          # Stocker le contenu de la clé privée pour appleboy/ssh-action
+          echo "SSH_PRIV_KEY<<EOF" >> $GITHUB_ENV
+          cat ~/.ssh/id_ephemeral >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Terraform Apply
         id: apply
@@ -197,7 +201,7 @@ jobs:
         with:
           host: ${{ env.EC2_IP }}
           username: ubuntu
-          key_path: ~/.ssh/id_ephemeral
+          key: ${{ env.SSH_PRIV_KEY }}
           envs: RDS_ENDPOINT, DOCKERHUB_USER, DOCKERHUB_TOKEN
           script: |
             # Attendre que Docker soit installé par user_data si c'est le premier lancement
