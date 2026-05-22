@@ -138,7 +138,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/digitrans-crm-frontend:${{ github.sha }}
 
   # 5. Déploiement Terraform Apply et Mise en Ligne sur EC2
-  deploy:
+  terraform-apply-and-deploy:
     needs: [terraform-plan, docker-build-push]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
