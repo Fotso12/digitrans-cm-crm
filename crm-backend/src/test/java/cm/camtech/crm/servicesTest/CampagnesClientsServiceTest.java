@@ -112,6 +112,7 @@ public class CampagnesClientsServiceTest {
     @Test
     void testDeleteCampagnesClients() {
 
+        when(campagnesClientsRepo.existsById(campagnesClientsPK)).thenReturn(true);
         doNothing().when(campagnesClientsRepo)
                 .deleteById(campagnesClientsPK);
 

@@ -91,6 +91,7 @@ public class UtilisateursServiceTest {
     @Test
     void testDeleteUtilisateur() {
 
+        when(utilisateursRepo.existsById(1L)).thenReturn(true);
         doNothing().when(utilisateursRepo).deleteById(1L);
 
         utilisateursService.deleteUtilisateur(1L);

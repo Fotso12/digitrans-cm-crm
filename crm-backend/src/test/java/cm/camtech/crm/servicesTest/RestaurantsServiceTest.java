@@ -91,6 +91,7 @@ public class RestaurantsServiceTest {
     @Test
     void testDeleteRestaurant() {
 
+        when(restaurantsRepo.existsById(1L)).thenReturn(true);
         doNothing().when(restaurantsRepo).deleteById(1L);
 
         restaurantsService.deleteRestaurant(1L);
