@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
 import { LoginComponent } from './modules/auth/login/login.component';
+import { RegisterComponent } from './modules/auth/register/register.component';
 import { DashboardComponent } from './modules/dashboard/dashboard.component';
 import { ListeClientsComponent } from './modules/clients/liste-clients/liste-clients.component';
 import { FicheClientComponent } from './modules/clients/fiche-client/fiche-client.component';
@@ -20,6 +21,7 @@ import { FormRestaurantComponent } from './modules/restaurants/form-restaurant/f
 
 export const routes: Routes = [
   { path: 'auth/login', component: LoginComponent },
+  { path: 'auth/register', component: RegisterComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'clients', component: ListeClientsComponent, canActivate: [authGuard] },
   { path: 'clients/nouveau', component: FormClientComponent, canActivate: [authGuard] },

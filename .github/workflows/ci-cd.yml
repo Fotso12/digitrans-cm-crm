@@ -1,0 +1,240 @@
+name: Digitrans CRM CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # 1. Validation et Tests
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Backend Checks
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and Test Backend
+        run: |
+          cd crm-backend
+          mvn clean test
+
+      # Frontend Checks
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: crm-frontend/package.json
+
+      - name: Install Frontend Deps & Test
+        run: |
+          cd crm-frontend
+          npm install
+          # Vitest est configuré dans package.json, exécutons les tests sans watcher
+          npx vitest run --passWithNoTests
+
+  # 2. Scans de Sécurité
+  security-scans:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Scan Terraform (tfsec)
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      # Scan de vulnérabilités Trivy (Code & Dépendances)
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
+
+  # 3. Validation Terraform (Init & Plan)
+  terraform-plan:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      - name: Terraform Format Check
+        run: |
+          cd terraform
+          terraform fmt -check
+
+      - name: Terraform Init
+        run: |
+          cd terraform
+          terraform init
+
+      - name: Terraform Validate
+        run: |
+          cd terraform
+          terraform validate
+
+      - name: Terraform Plan
+        run: |
+          cd terraform
+          # Passer une fausse clé publique si non configurée pour que le plan passe
+          terraform plan -var="ssh_public_key=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICc16d5R1uG6u5NfX6h7j5oF8l8y8n5w8d8q8r8s8t8u dummy"
+
+  # 4. Construction et Push Docker Hub (uniquement sur push main/master)
+  docker-build-push:
+    needs: [lint-and-test, security-scans]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Build & Push Backend
+      - name: Build and Push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./crm-backend
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/digitrans-crm-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/digitrans-crm-backend:${{ github.sha }}
+
+      # Build & Push Frontend
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./crm-frontend
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/digitrans-crm-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/digitrans-crm-frontend:${{ github.sha }}
+
+  # 5. Déploiement Terraform Apply et Mise en Ligne sur EC2
+  deploy:
+    needs: [terraform-plan, docker-build-push]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+
+      - name: Terraform Init
+        run: |
+          cd terraform
+          terraform init
+
+      # S'assurer d'avoir une clé SSH pour se connecter et déployer
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          # Extraire la clé publique pour Terraform
+          ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+
+      - name: Terraform Apply
+        id: apply
+        run: |
+          cd terraform
+          # Appliquer en passant la clé publique extraite
+          terraform apply -auto-approve -var="ssh_public_key=$(cat ~/.ssh/id_rsa.pub)"
+          
+          # Récupérer les Outputs nécessaires
+          EC2_IP=$(terraform output -raw ec2_public_ip)
+          RDS_ENDPOINT=$(terraform output -raw database_endpoint)
+          echo "EC2_IP=$EC2_IP" >> $GITHUB_ENV
+          echo "RDS_ENDPOINT=$RDS_ENDPOINT" >> $GITHUB_ENV
+
+      # Déploiement des conteneurs Docker sur EC2 via SSH
+      - name: SSH and Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.EC2_IP }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: RDS_ENDPOINT, DOCKERHUB_USERNAME
+          script: |
+            # Attendre que Docker soit installé par user_data si c'est le premier lancement
+            until command -v docker-compose &> /dev/null; do
+              echo "En attente de l'installation de Docker et docker-compose..."
+              sleep 10
+            done
+            
+            # Se connecter à Docker Hub
+            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+            
+            # Créer le répertoire de l'application
+            mkdir -p ~/app
+            cd ~/app
+            
+            # Générer un docker-compose.yml de production
+            cat <<EOT > docker-compose.yml
+            version: '3.8'
+            services:
+              crm-backend:
+                image: ${DOCKERHUB_USERNAME}/digitrans-crm-backend:latest
+                container_name: crm-backend
+                restart: always
+                ports:
+                  - "8081:8081"
+                environment:
+                  - SPRING_DATASOURCE_URL=jdbc:mysql://${RDS_ENDPOINT}/crm_digitrans?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+                  - SPRING_DATASOURCE_USERNAME=dbadmin
+                  - SPRING_DATASOURCE_PASSWORD=dbpassword12345
+                  - JWT_SECRET=CamtechCrmSecretKey2026DigitransCM
+                  - SECURITY_JWT_SECRET=CamtechCrmSecretKey2026DigitransCM
+                  - SPRING_WEB_CORS_ALLOWED_ORIGINS=*
+
+              crm-frontend:
+                image: ${DOCKERHUB_USERNAME}/digitrans-crm-frontend:latest
+                container_name: crm-frontend
+                restart: always
+                ports:
+                  - "80:80"
+                depends_on:
+                  - crm-backend
+            EOT
+            
+            # Pull et démarrage des nouveaux conteneurs
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d --force-recreate
+            
+            # Nettoyer les anciennes images
+            docker image prune -f

@@ -15,7 +15,10 @@
               <label class="form-label">Mot de passe</label>
               <input type="password" class="form-control" [(ngModel)]="motDePasse" name="motDePasse" required>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Connexion</button>
+            <button type="submit" class="btn btn-primary w-100 mb-3">Connexion</button>
+            <div class="text-center">
+              <a routerLink="/auth/register" class="text-decoration-none">Créer un compte</a>
+            </div>
           </form>
         </div>
       </div>

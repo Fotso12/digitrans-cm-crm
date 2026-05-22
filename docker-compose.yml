@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: crm-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: crm_digitrans
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: dbadmin
+      MYSQL_PASSWORD: dbpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  crm-backend:
+    build:
+      context: ./crm-backend
+      dockerfile: Dockerfile
+    container_name: crm-backend
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/crm_digitrans?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=dbadmin
+      - SPRING_DATASOURCE_PASSWORD=dbpassword
+      - JWT_SECRET=CamtechCrmSecretKey2026DigitransCM
+      - SECURITY_JWT_SECRET=CamtechCrmSecretKey2026DigitransCM
+      - SPRING_WEB_CORS_ALLOWED_ORIGINS=http://localhost,http://localhost:80
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+
+  crm-frontend:
+    build:
+      context: ./crm-frontend
+      dockerfile: Dockerfile
+    container_name: crm-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - crm-backend
+
+volumes:
+  mysql-data:
