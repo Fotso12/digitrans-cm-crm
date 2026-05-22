@@ -39,8 +39,8 @@ jobs:
         run: |
           cd crm-frontend
           npm install
-          # Vitest est configuré dans package.json, exécutons les tests sans watcher
-          npx vitest run --passWithNoTests
+          # Utilisons le lanceur Angular CLI officiel pour que TestBed soit correctement initialisé
+          npm run test -- --run
 
   # 2. Scans de Sécurité
   security-scans:
